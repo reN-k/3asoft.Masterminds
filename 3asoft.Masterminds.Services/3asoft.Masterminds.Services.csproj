@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>_3asoft_Masterminds_Services</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\3asoft.Masterminds.Core\3asoft.Masterminds.Core.csproj" />
+    <ProjectReference Include="..\3asoft.Masterminds.Data\3asoft.Masterminds.Data.csproj" />
+    <ProjectReference Include="..\3asoft.Masterminds.Interfaces\3asoft.Masterminds.Interfaces.csproj" />
+  </ItemGroup>
+
+</Project>
