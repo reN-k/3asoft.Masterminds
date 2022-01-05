@@ -24,13 +24,13 @@ namespace _3asoft.Masterminds.Core.Models
         //    Rating = _rating;
         //}
 
-        public ShortDescriptionMentorModel(int _id, AvatarModel _avatar, string _name, string _profession, double _rating)
-        {
-            Id = _id;
-            Name = _name;
-            Profession = _profession;
-            Rating = _rating;
-            Avatar = _avatar;
-        }
+        //public ShortDescriptionMentorModel(int _id, AvatarModel _avatar, string _name, string _profession, double _rating)
+        //{
+        //    Id = _id;
+        //    Name = _name;
+        //    Profession = _profession;
+        //    Rating = _rating;
+        //    Avatar = _avatar;
+        //}
     }
 }

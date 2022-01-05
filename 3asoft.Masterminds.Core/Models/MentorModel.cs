@@ -26,36 +26,36 @@ namespace _3asoft.Masterminds.Core.Models
 
         public MentorModel() { }
 
-        public MentorModel(int _id, string _name, string _profession, double _rate, 
-            List<string> _professionalAspects, string _description, params ReviewModel[] _reviews)
-        {
-            Id = _id;
-            Avatar = new AvatarModel(Id);
-            //Photo = _photo;
-            Name = _name;
-            Profession = _profession;
-            Rate = _rate;
-            ProfessionalAspects = _professionalAspects;
-            Desctiption = _description;
-            Reviews = _reviews;
+        //public MentorModel(int _id, string _name, string _profession, double _rate, 
+        //    List<string> _professionalAspects, string _description, params ReviewModel[] _reviews)
+        //{
+        //    Id = _id;
+        //    Avatar = new AvatarModel(Id);
+        //    //Photo = _photo;
+        //    Name = _name;
+        //    Profession = _profession;
+        //    Rate = _rate;
+        //    ProfessionalAspects = _professionalAspects;
+        //    Desctiption = _description;
+        //    Reviews = _reviews;
 
 
-            if (_reviews.Length > 0)
-            {
-                double sum = 0;
+        //    if (_reviews.Length > 0)
+        //    {
+        //        double sum = 0;
 
-                for (int i = 0; i < _reviews.Length; i++)
-                {
-                    sum += _reviews[i].Rating;
-                }
-                Rating = Math.Round ( sum / _reviews.Length, 2); //округляем до 2х знаков
-            }
+        //        for (int i = 0; i < _reviews.Length; i++)
+        //        {
+        //            sum += _reviews[i].Rating;
+        //        }
+        //        Rating = Math.Round ( sum / _reviews.Length, 2); //округляем до 2х знаков
+        //    }
                
-        }
+        //}
 
-        public void SetAvatar(AvatarModel _avatar)
-        {
-            this.Avatar = _avatar;
-        }
+        //public void SetAvatar(AvatarModel _avatar)
+        //{
+        //    this.Avatar = _avatar;
+        //}
     }
 }

@@ -12,11 +12,11 @@ namespace _3asoft.Masterminds.Core.Models
         public string AuthorName { get; set; }
         public string Photo { get; set; }
         public string Text { get; set; } 
-        public double Rating { get; set; }
+        public float Rating { get; set; }
 
         public static int ReviewCount = 0;
 
-        public ReviewModel(double _rating)
+        public ReviewModel(float _rating)
         {
             Id = ++ReviewCount;
             AuthorName = $"Ivan{_rating} Ivanov";

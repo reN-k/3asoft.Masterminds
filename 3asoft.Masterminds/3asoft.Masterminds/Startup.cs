@@ -1,7 +1,11 @@
+using _3asoft.Masterminds.Data;
+using _3asoft.Masterminds.Interfaces;
+using _3asoft.Masterminds.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -26,6 +30,11 @@ namespace _3asoft.Masterminds
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<MastermindsDbContext>(options => options.UseSqlServer(
+                "Server=DESKTOP-CGFTLQV\\SQLEXPRESS;Database=Masterminds;Trusted_Connection=True;"));  //MSSQLLocalDB
+            //(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddScoped<IMentorService, MentorService>();
+            services.AddScoped<IMentorStorage, MentorStorage>();
 
             services.AddControllers();
             services.AddSwaggerGen(c =>

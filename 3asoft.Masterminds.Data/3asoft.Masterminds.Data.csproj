@@ -5,4 +5,18 @@
     <RootNamespace>_3asoft.Masterminds.Data</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="Bogus" Version="34.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.13" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.13">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\3asoft.Masterminds.Core\3asoft.Masterminds.Core.csproj" />
+    <ProjectReference Include="..\3asoft.Masterminds.Interfaces\3asoft.Masterminds.Interfaces.csproj" />
+  </ItemGroup>
+
 </Project>
