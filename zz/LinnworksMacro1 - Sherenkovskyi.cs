@@ -1,137 +1,216 @@
-﻿//using LinnworksAPI;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Text.RegularExpressions;
+﻿using LinnworksAPI;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 
-//namespace LinnworksMacro
-//{
-//    public class LinnworksMacro : LinnworksMacroHelpers.LinnworksMacroBase
-//    {
-//        public void Execute()
-//        {
-//            Logger.WriteInfo("Start my test macro");            
-//            MyTestMacro1();
-//            Logger.WriteInfo("End my test macro");            
-//        }
+namespace LinnworksMacro
+{
+    public class LinnworksMacro : LinnworksMacroHelpers.LinnworksMacroBase
+    {
+        private readonly string _locationName = "XYZ";
 
-//        private void MyTestMacro1()
-//        {
-//            var locationName = "XYZ";
-//            var locationGuid = GetLocationGuidUsingName(locationName);
+        public void Execute()
+        {
+            Logger.WriteInfo("Start my test macro 1");
 
-//            List<BooleanFieldFilter> boolFieldsFilters = new List<BooleanFieldFilter>()
-//            {
-//                new BooleanFieldFilter()
-//                {
-//                    FieldCode = FieldCode.GENERAL_INFO_PARKED,
-//                    Value = false,
-//                },
-//                new BooleanFieldFilter()
-//                {
-//                    FieldCode = FieldCode.GENERAL_INFO_LOCKED,
-//                    Value = false,
-//                }
-//            };            
-//            var fieldsFilter = new FieldsFilter()
-//            {
-//                BooleanFields = boolFieldsFilters,
-//            };
+            MyTestMacro1();
 
-//            List<FieldSorting> fieldSortings = new List<FieldSorting>()
-//            {
-//                new FieldSorting()
-//                {
-//                    FieldCode = FieldCode.GENERAL_INFO_DATE,
-//                    Direction = 0 // ASC
-//                }
-//            };
+            Logger.WriteInfo("End my test macro 1");
+        }
 
-//            var openOrdersAtLocation = Api.Orders.GetAllOpenOrders(fieldsFilter, fieldSortings, locationGuid, "");
+        private void MyTestMacro1()
+        {
+            var locationNullableGuid = GetLocationGuidUsingName(_locationName);
 
-//            Logger.WriteInfo($"Founded {openOrdersAtLocation.Count} orders.");
+            if (locationNullableGuid != null)
+            {
+                Guid locationGuid = locationNullableGuid.Value;
 
-//            foreach (var orderId in openOrdersAtLocation)
-//            {
-//                CheckOrderItems(orderId);
-//            }
-//        }
+                List<BooleanFieldFilter> boolFieldsFilters = new List<BooleanFieldFilter>()
+                {
+                    new BooleanFieldFilter()
+                    {
+                        FieldCode = FieldCode.GENERAL_INFO_PARKED,
+                        Value = false,
+                    },
+                    new BooleanFieldFilter()
+                    {
+                        FieldCode = FieldCode.GENERAL_INFO_LOCKED,
+                        Value = false,
+                    }
+                };
+                var fieldsFilter = new FieldsFilter()
+                {
+                    BooleanFields = boolFieldsFilters,
+                };
 
-//        private Guid GetLocationGuidUsingName(string locationName)
-//        {
-//            var allLocations = Api.Inventory.GetStockLocations();
+                List<FieldSorting> fieldSortings = new List<FieldSorting>()
+                {
+                    new FieldSorting()
+                    {
+                        FieldCode = FieldCode.GENERAL_INFO_DATE,
+                        Direction = 0 // ASC
+                    }
+                };
 
-//            foreach (var location in allLocations)
-//            {
-//                var locationGuid = allLocations.Where(loca => loca.LocationName == locationName).FirstOrDefault().StockLocationId;
-//                return locationGuid;
-//            }
+                var openOrdersAtLocation = GetOpenOrders(fieldsFilter, fieldSortings, locationGuid, String.Empty);
 
-//            Logger.WriteError($"No locations with {locationName} founded.");
-//            return new Guid();
-//        }
+                if (openOrdersAtLocation != null)
+                {
+                    Logger.WriteInfo($"Founded {openOrdersAtLocation.Count} orders.");
 
-//        private void CheckOrderItems(Guid orderId)
-//        {
-//            var order = Api.Orders.GetOrderById(orderId);
-//            var orderItems = order.Items;
-//            bool orderCanMoveToDefaultLocation = true;
-//            bool orderHasServiceItem = false;
+                    foreach (var orderId in openOrdersAtLocation)
+                    {
+                        CheckOrderItems(orderId);
+                    }
+                }
+            }
+            else Logger.WriteError($"No location <{_locationName}> founded.");
+        }
 
-//            var defaultLocationGuid = GetLocationGuidUsingName("Default");
+        private Guid? GetLocationGuidUsingName(string locationName)
+        {
+            var allLocations = GetAllStockLocations();
 
-//            Logger.WriteInfo($"Work with order # {order.NumOrderId}:");
+            if (allLocations != null)
+            {
+                var locationGuid = allLocations.Where(loca => loca.LocationName == locationName).FirstOrDefault()?.StockLocationId;
 
-//            foreach (var item in orderItems)
-//            {
-//                GetStockLevelByLocationRequest stockLevelAtDefaultLocationRequest = new GetStockLevelByLocationRequest()
-//                {
-//                    LocationId = defaultLocationGuid,
-//                    StockItemId = item.StockItemId
-//                };
-//                var stockLevelAtDefaultLocationResponse = Api.Stock.GetStockLevelByLocation(stockLevelAtDefaultLocationRequest);
+                return locationGuid;
+            }
+            else return null;
+        }
 
-//                int quantityAtDefaultLocation = stockLevelAtDefaultLocationResponse.StockLevel.Available;
+        private void CheckOrderItems(Guid orderId)
+        {
+            var order = GetOrderDetails(orderId);
 
-//                if (item.IsService)
-//                {
-//                    orderHasServiceItem = true;
-//                }
+            if (order.OrderId != null && order.OrderId != Guid.Empty)
+            {
+                var orderItems = order.Items;
+                bool orderCanMoveToDefaultLocation = true;
+                bool orderHasServiceItem = false;
 
-//                if (quantityAtDefaultLocation < item.Quantity)
-//                {
-//                    Logger.WriteInfo("Тhere is no required number of items in default location.");
+                var defaultLocationNullableGuid = GetLocationGuidUsingName("Default");
+                var defaultLocationGuid = defaultLocationNullableGuid.Value;
 
-//                    orderCanMoveToDefaultLocation = false;
-//                    break;
-//                }
+                Logger.WriteInfo($"Work with order # {order.NumOrderId}:");
 
-//                if (item.IsUnlinked)
-//                {
-//                    Logger.WriteInfo("Order has unlinked item.");
+                foreach (var item in orderItems)
+                {
+                    GetStockLevelByLocationRequest stockLevelAtDefaultLocationRequest = new GetStockLevelByLocationRequest()
+                    {
+                        LocationId = defaultLocationGuid,
+                        StockItemId = item.StockItemId
+                    };
+                    var stockLevelAtDefaultLocationResponse = GetStockLevelByLocation(stockLevelAtDefaultLocationRequest);
 
-//                    orderCanMoveToDefaultLocation = false;
-//                    break;
-//                }
+                    if (stockLevelAtDefaultLocationResponse != null)
+                    {
+                        int quantityAtDefaultLocation = stockLevelAtDefaultLocationResponse.StockLevel.Available;
 
-//            }
+                        if (item.IsService)
+                        {
+                            orderHasServiceItem = true;
+                        }
 
+                        if (quantityAtDefaultLocation < item.Quantity)
+                        {
+                            Logger.WriteInfo("Тhere is no required number of items in default location.");
 
-//            if (orderCanMoveToDefaultLocation )//&& orderHasServiceItem)
-//            {
-//                Logger.WriteInfo($"All order items can relocate");
+                            orderCanMoveToDefaultLocation = false;
+                            break;
+                        }
 
-//                List<Guid> orders = new List<Guid> { orderId };
+                        if (item.IsUnlinked)
+                        {
+                            Logger.WriteInfo("Order has unlinked item.");
 
-//                Api.Orders.MoveToLocation(orders, defaultLocationGuid);
+                            orderCanMoveToDefaultLocation = false;
+                            break;
+                        }
+                    }
+                }
 
-//                Logger.WriteInfo("Relocated to default");
-//            }
-//            else
-//            {
-//                Logger.WriteInfo($"Order CANT relocate");
-//            }
-//        }
-//    }
-//}
+                if (orderCanMoveToDefaultLocation)//&& orderHasServiceItem)
+                {
+                    Logger.WriteInfo($"All order items can relocate");
+
+                    MoveOrderToLocation(orderId, defaultLocationGuid);
+                }
+                else Logger.WriteInfo($"Order CANT relocate");
+            }
+            else Logger.WriteWarning($"Order is null or empty");
+        }
+
+        private OrderDetails GetOrderDetails(Guid orderGuid)
+        {
+            try
+            {
+                return Api.Orders.GetOrderById(orderGuid);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"Can't get order. Error -> {ex}");
+                return new OrderDetails();
+            }
+        }
+
+        private void MoveOrderToLocation(Guid orderGuid, Guid locationGuid)
+        {
+            try
+            {
+                List<Guid> orders = new List<Guid> { orderGuid };
+
+                Api.Orders.MoveToLocation(orders, locationGuid);
+
+                Logger.WriteInfo("Relocated to new location");
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"Cant relocate order. Error -> {ex}");
+            }
+        }
+
+        private List<Guid> GetOpenOrders(FieldsFilter fieldsFilter, List<FieldSorting> fieldSortings, Guid locationGuid, string additionalFilter)
+        {
+            try
+            {
+                return Api.Orders.GetAllOpenOrders(fieldsFilter, fieldSortings, locationGuid, additionalFilter);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"Can't get open orders. Error -> {ex}");
+                return null;
+            }
+        }
+
+        private List<InventoryStockLocation> GetAllStockLocations()
+        {
+            try
+            {
+                return Api.Inventory.GetStockLocations();
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"Can't get stock locations. Error -> {ex}");
+                return null;
+            }
+        }
+
+        private GetStockLevelByLocationResponse GetStockLevelByLocation(GetStockLevelByLocationRequest request)
+        {
+            try
+            {
+                return Api.Stock.GetStockLevelByLocation(request);
+            }
+            catch (Exception ex)
+            {
+                Logger.WriteError($"Can't get stock level of {request.StockItemId} on {request.LocationId}. Error -> {ex}");
+                return null;
+            }
+        }
+    }
+}
